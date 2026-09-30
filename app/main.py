@@ -47,7 +47,7 @@ def read_item():
 
 @app.delete("/users/delete/{user_id}")
 def delete_user(user_id: int):
-    for user in fake_user_database:
+    for idx, user in enumerate(fake_user_database):
         if user.id == user_id:
             del fake_user_database[idx]
             return f"User {user.name} deleted successfully \n {user}"
@@ -64,3 +64,4 @@ def update_user(user_id: int, age: int, name: str, description: str):
             user.description = description
             return f"{user.name} updated successfully \n {user}"
 
+    raise HTTPException(status_code=404, detail="User not found")
