@@ -30,7 +30,7 @@ def create_user(
                     age=age)
 
     fake_user_database.append(new_user)
-    return f"{new_user.name} created successfully \n {new_user}"
+    return f"{new_user.name} created sas successfully \n {new_user}"
 
 
 @app.get("/users/{user_id}")
