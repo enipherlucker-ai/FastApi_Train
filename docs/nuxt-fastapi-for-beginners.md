@@ -291,6 +291,9 @@ npm run dev
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  nitro: {
+    externals: { inline: [/[\\/]node_modules[\\/]nuxt[\\/]dist[\\/]/] },
+  },
   runtimeConfig: {
     public: {
       apiBase: 'http://127.0.0.1:8000',
@@ -300,6 +303,8 @@ export default defineNuxtConfig({
 ```
 
 (Строку `compatibilityDate` оставь такой, какую создал мастер.)
+
+> **Блок `nitro` — заплатка для Windows, а не часть урока.** В Nuxt 4.6.0 на Windows любая страница отдаёт ошибку 500 `Either manifest or precomputed data must be provided` ([баг Nuxt #36467](https://github.com/nuxt/nuxt/issues/36467)). Эта строка обходит его; на Linux и macOS она ничего не меняет. Запоминать её не нужно. Когда выйдет версия Nuxt с исправлением, блок можно удалить.
 
 - `runtimeConfig` — настройки, которые можно поменять **при запуске**, без пересборки, через переменные окружения. Значение `public.apiBase` заменяется переменной `NUXT_PUBLIC_API_BASE`.
 - `public` — эти настройки попадут в браузер. Всё, что лежит в `runtimeConfig` **вне** `public`, видно только Nuxt-серверу: туда кладут секреты.
@@ -518,6 +523,10 @@ const emit = defineEmits<{ delete: [id: number] }>()
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  // Заплатка для бага Nuxt 4.6.0 на Windows (ошибка 500 «Either manifest...»)
+  nitro: {
+    externals: { inline: [/[\\/]node_modules[\\/]nuxt[\\/]dist[\\/]/] },
+  },
   // 7. Адрес API — настройка, меняется переменной NUXT_PUBLIC_API_BASE без правки кода
   runtimeConfig: {
     public: {
@@ -767,6 +776,7 @@ name.value = 'Анна'   // в <script>: всегда через .value
 
 | Симптом | Этап | Что проверить |
 |---|---|---|
+| Любая страница: 500 `Either manifest or precomputed data must be provided` | запуск | Баг Nuxt 4.6.0 на Windows: добавь в `nuxt.config.ts` блок `nitro` из шага 3 и перезапусти `npm run dev` |
 | `npm run dev` пишет `nuxt: not found` | запуск | Ты в папке `frontend/`? Был ли `npm install`? |
 | Страница Nuxt не открывается вообще | запуск | Запущен ли `npm run dev`, какой адрес он напечатал |
 | `npm run dev` пишет `Using alternative port 3001` | запуск | Порт 3000 занят другим процессом (часто — забытым вторым `npm run dev`). Останови его: на 3001 сломается CORS |
