@@ -781,6 +781,7 @@ name.value = 'Анна'   // в <script>: всегда через .value
 | Симптом | Этап | Что проверить |
 |---|---|---|
 | Любая страница: 500 `Either manifest or precomputed data must be provided` | запуск | Баг Nuxt 4.6.0 на Windows: добавь в `nuxt.config.ts` блок `nitro` из шага 3 и перезапусти `npm run dev` |
+| PyCharm/WebStorm подчёркивает красным `useFetch`, `users?.length`, `user.name` (`No overload matches this call`, `Property ... does not exist`), а страница работает | редактор | Встроенная проверка Vue в IDE не до конца понимает типы Nuxt 4. Истину скажет официальная проверка: один раз `npm i -D vue-tsc typescript@5`, потом `npx nuxi typecheck` в папке `frontend/`. Нет ошибок — код верный. В IDE помогает: Settings → Languages & Frameworks → TypeScript → Vue → Vue Language Server |
 | `npm run dev` пишет `nuxt: not found` | запуск | Ты в папке `frontend/`? Был ли `npm install`? |
 | Страница Nuxt не открывается вообще | запуск | Запущен ли `npm run dev`, какой адрес он напечатал |
 | `npm run dev` пишет `Using alternative port 3001` | запуск | Порт 3000 занят другим процессом (часто — забытым вторым `npm run dev`). Останови его: на 3001 сломается CORS |
