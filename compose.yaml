@@ -7,7 +7,13 @@ services:
     volumes:
       - ./app:/code/app
     command: ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-    environment: {WATCHFILES_FORCE_POLLING: "true"}
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pg_database:5432/${POSTGRES_DB}"
+      DB_ECHO: "true"
+    depends_on:
+      pg_database:
+        condition: service_healthy
   pg_database:
     image: postgres:18
     environment:

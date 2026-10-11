@@ -1241,7 +1241,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api.users import router as users_router
+from app.api.user import router as users_router
 from app.database import engine
 
 
