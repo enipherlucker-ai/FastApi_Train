@@ -291,6 +291,9 @@ npm run dev
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  nitro: {
+    externals: { inline: [/[\\/]node_modules[\\/]nuxt[\\/]dist[\\/]/] },
+  },
   runtimeConfig: {
     public: {
       apiBase: 'http://127.0.0.1:8000',
@@ -300,6 +303,8 @@ export default defineNuxtConfig({
 ```
 
 (Строку `compatibilityDate` оставь такой, какую создал мастер.)
+
+> **Блок `nitro` — заплатка для Windows, а не часть урока.** В Nuxt 4.6.0 на Windows любая страница отдаёт ошибку 500 `Either manifest or precomputed data must be provided` ([баг Nuxt #36467](https://github.com/nuxt/nuxt/issues/36467)). Эта строка обходит его; на Linux и macOS она ничего не меняет. Запоминать её не нужно. Когда выйдет версия Nuxt с исправлением, блок можно удалить.
 
 - `runtimeConfig` — настройки, которые можно поменять **при запуске**, без пересборки, через переменные окружения. Значение `public.apiBase` заменяется переменной `NUXT_PUBLIC_API_BASE`.
 - `public` — эти настройки попадут в браузер. Всё, что лежит в `runtimeConfig` **вне** `public`, видно только Nuxt-серверу: туда кладут секреты.
@@ -353,9 +358,7 @@ import type { User } from '~/types/user'
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
-const { data: users, pending, error, refresh } = await useFetch<User[]>('/users', {
-  baseURL: apiBase,
-})
+const { data: users, pending, error, refresh } = await useFetch<User[]>(`${apiBase}/users`)
 </script>
 ```
 
@@ -363,7 +366,8 @@ const { data: users, pending, error, refresh } = await useFetch<User[]>('/users'
 - `useFetch` делает GET-запрос **при открытии страницы** и возвращает объект с полями. `{ data: users, ... }` — достаём поле `data` и называем его `users`.
 - `data` — ответ сервера; `pending` — `true`, пока запрос идёт; `error` — ошибка или `null`; `refresh` — функция «загрузи заново».
 - `<User[]>` — подсказка для TypeScript: «в ответе массив пользователей». На то, что реально пришлёт сервер, она не влияет.
-- `baseURL` + `'/users'` = `http://127.0.0.1:8000/users`.
+- `` `${apiBase}/users` `` — строка-шаблон: обратные кавычки, а `${...}` подставляет значение. Получится `http://127.0.0.1:8000/users`.
+- Почему не опция `baseURL`, как дальше у `$fetch`: в Nuxt 4.6 из-за ошибки в типах `useFetch<User[]>(..., { baseURL })` подчёркивается красным в редакторе и в `nuxi typecheck`, хотя работает. Полный адрес в первом аргументе этой проблемы не имеет.
 - `await` нужен, чтобы при SSR Nuxt дождался данных и отдал браузеру HTML уже со списком.
 
 Шаблон под скриптом:
@@ -522,6 +526,10 @@ const emit = defineEmits<{ delete: [id: number] }>()
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  // Заплатка для бага Nuxt 4.6.0 на Windows (ошибка 500 «Either manifest...»)
+  nitro: {
+    externals: { inline: [/[\\/]node_modules[\\/]nuxt[\\/]dist[\\/]/] },
+  },
   // 7. Адрес API — настройка, меняется переменной NUXT_PUBLIC_API_BASE без правки кода
   runtimeConfig: {
     public: {
@@ -583,9 +591,7 @@ const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
 // 2, 4. GET /users при открытии страницы; 5. pending и error; 6. refresh
-const { data: users, pending, error, refresh } = await useFetch<User[]>('/users', {
-  baseURL: apiBase,
-})
+const { data: users, pending, error, refresh } = await useFetch<User[]>(`${apiBase}/users`)
 
 // Поля формы — реактивные переменные
 const name = ref('')
@@ -771,6 +777,8 @@ name.value = 'Анна'   // в <script>: всегда через .value
 
 | Симптом | Этап | Что проверить |
 |---|---|---|
+| Любая страница: 500 `Either manifest or precomputed data must be provided` | запуск | Баг Nuxt 4.6.0 на Windows: добавь в `nuxt.config.ts` блок `nitro` из шага 3 и перезапусти `npm run dev` |
+| Редактор подчёркивает красным `useFetch` (`No overload matches this call`), а за ним `users?.length`, `user.name` (`Property ... does not exist`), хотя страница работает | типы | Ошибка типов Nuxt 4.6 при `useFetch<Тип>(..., { baseURL })`. Пиши полный адрес в первом аргументе: `` useFetch<User[]>(`${apiBase}/users`) ``. Проверить типы всего проекта: один раз `npm i -D vue-tsc typescript@5`, потом `npx nuxi typecheck` в `frontend/` |
 | `npm run dev` пишет `nuxt: not found` | запуск | Ты в папке `frontend/`? Был ли `npm install`? |
 | Страница Nuxt не открывается вообще | запуск | Запущен ли `npm run dev`, какой адрес он напечатал |
 | `npm run dev` пишет `Using alternative port 3001` | запуск | Порт 3000 занят другим процессом (часто — забытым вторым `npm run dev`). Останови его: на 3001 сломается CORS |
@@ -930,9 +938,7 @@ import type { User } from '~/types/user'
 const route = useRoute()
 const config = useRuntimeConfig()
 
-const { data: user, error } = await useFetch<User>(`/users/${route.params.id}`, {
-  baseURL: config.public.apiBase,
-})
+const { data: user, error } = await useFetch<User>(`${config.public.apiBase}/users/${route.params.id}`)
 </script>
 
 <template>
@@ -1071,9 +1077,7 @@ type Task = {
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
-const { data: tasks, error, refresh } = await useFetch<Task[]>('/tasks', {
-  baseURL: apiBase,
-})
+const { data: tasks, error, refresh } = await useFetch<Task[]>(`${apiBase}/tasks`)
 
 const title = ref('')
 
@@ -1151,13 +1155,12 @@ async function deleteTask(id: number) {
 const config = useRuntimeConfig()
 const apiBase = import.meta.server ? config.apiBaseServer : config.public.apiBase
 
-const { data: users, pending, error, refresh } = await useFetch<User[]>('/users', {
+const { data: users, pending, error, refresh } = await useFetch<User[]>(`${apiBase}/users`, {
   key: 'users',
-  baseURL: apiBase,
 })
 ```
 
-`import.meta.server` — `true` при выполнении на Nuxt-сервере. `key` обязателен: без него Nuxt строит ключ запроса в том числе из `baseURL`, и раз адреса на сервере и в браузере разные, браузер не узнает данные, полученные сервером. Он запросит список повторно, а в консоли появится `Hydration completed but contains mismatches`.
+`import.meta.server` — `true` при выполнении на Nuxt-сервере. `key` обязателен: без него Nuxt строит ключ запроса из адреса, и раз адреса на сервере и в браузере разные, браузер не узнает данные, полученные сервером. Он запросит список повторно, а в консоли появится `Hydration completed but contains mismatches`.
 
 `frontend/Dockerfile`:
 
@@ -1256,9 +1259,7 @@ type <Сущность> = { id: number, <поле>: <тип> }
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
-const { data: <items>, pending, error, refresh } = await useFetch<<Сущность>[]>('<путь списка>', {
-  baseURL: apiBase,
-})
+const { data: <items>, pending, error, refresh } = await useFetch<<Сущность>[]>(`${apiBase}<путь списка>`)
 
 const <поле> = ref(<начальное значение>)
 
