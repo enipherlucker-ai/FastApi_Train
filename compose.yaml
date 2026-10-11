@@ -8,3 +8,24 @@ services:
       - ./app:/code/app
     command: ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     environment: {WATCHFILES_FORCE_POLLING: "true"}
+  pg_database:
+    image: postgres:18
+    environment:
+        POSTGRES_USER: ${POSTGRES_USER},
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD},
+        POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+volumes:
+  pg_data:
+
