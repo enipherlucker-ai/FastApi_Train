@@ -1,8 +1,42 @@
-import os
+from functools import lru_cache
+from pathlib import Path
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+asyncpg://user:secret@127.0.0.1:5432/pg_test_db",
-)
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-DB_ECHO = os.getenv("DB_ECHO", "false").lower() == "true"
+
+class PostgresSettings(BaseModel):
+    host: str
+    port: int = '5432'
+    user: str
+    password: str = Field(default="", repr=False)
+    database: str
+    echo: bool = False
+
+    @property
+    def url(self):
+        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+
+class CheckReceiptSettings(BaseModel):
+    token: str = Field(default="", repr=False)
+    url: str
+    timeout: int = 30
+
+class Settings(BaseSettings):
+    app_env: str = "dev"
+    postgres_settings: PostgresSettings
+    check_receipt_settings: CheckReceiptSettings
+
+
+    model_config = SettingsConfigDict(
+        case_sensitive=False,
+        env_file=Path(__file__).resolve().parents[1] / ".env",
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+        extra="ignore",
+    )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

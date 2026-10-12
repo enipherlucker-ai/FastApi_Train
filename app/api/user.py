@@ -17,7 +17,13 @@ async def create_user(
         logs: ApiLogsDep,
 ) -> User:
     user = await users.create(**data.model_dump())
-    await logs.logs_add_user(input_data=str(data), output_data=str(user))
+    await logs.logs_add(
+        user_id=20260408,
+        service="self",
+        method="[POST]/create_user",
+        comment="Добавление пользователя",
+        input_data=str(data),
+        output_data=str(user))
     await session.commit()
     return user
 
