@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
 from app.models import User
-from app.repositories import UserRepository
+from app.repositories import UserRepository, ApiLogsRepository
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
@@ -24,3 +24,9 @@ async def get_user_or_404(user_id: int, users: UserRepoDep) -> User:
     return user
 
 UserDep = Annotated[UserRepository, Depends(get_user_or_404)]
+
+
+def get_logs_repository(session: SessionDep) -> ApiLogsRepository:
+    return ApiLogsRepository(session)
+
+ApiLogsDep = Annotated[ApiLogsRepository, Depends(get_logs_repository)]
