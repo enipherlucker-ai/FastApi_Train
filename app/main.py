@@ -6,11 +6,15 @@ from app.api.user import router as users_router
 from app.api.receipt import router as receipt_router
 from app.database import engine
 
+from app.api.dependencies import get_openai_client
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
     await engine.dispose()
+    if get_openai_client.cache_info().currsize:
+        await get_openai_client().close()
 
 
 app = FastAPI(lifespan=lifespan)

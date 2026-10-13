@@ -1,7 +1,9 @@
 from typing import Annotated
+from functools import lru_cache
 
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from openai import AsyncOpenAI
 
 from app.database import get_session
 from app.models import User
@@ -14,6 +16,7 @@ from app.repositories import (
 )
 from app.config import get_settings
 from app.foreign_api.check_receipt import CheckReceipt
+from app.foreign_api.categorizer import ReceiptCategorizer
 
 settings = get_settings()
 
@@ -65,3 +68,20 @@ def get_group_repository(session: SessionDep) -> GroupRepository:
     return GroupRepository(session)
 
 GroupRepoDep = Annotated[GroupRepository, Depends(get_group_repository)]
+
+@lru_cache
+def get_openai_client() -> AsyncOpenAI:
+    return AsyncOpenAI(
+        api_key=settings.open_ai_settings.api_key,
+        base_url=settings.open_ai_settings.base_url,
+        timeout=settings.open_ai_settings.timeout,
+        max_retries=1,
+    )
+
+
+def get_categorizer() -> ReceiptCategorizer | None:
+    if not settings.open_ai_settings.api_key:
+        return None
+    return ReceiptCategorizer(client=get_openai_client(), model=settings.open_ai_settings.model)
+
+CategorizerDep = Annotated[ReceiptCategorizer | None, Depends(get_categorizer)]

@@ -22,10 +22,17 @@ class CheckReceiptSettings(BaseModel):
     url: str
     timeout: int = 30
 
+class OpenAISettings(BaseModel):
+    api_key: str = Field(default="", repr=False)
+    model: str = "gpt-5.4-mini"
+    base_url: str | None = None
+    timeout: int = 30
+
 class Settings(BaseSettings):
     app_env: str = "dev"
     postgres_settings: PostgresSettings
     check_receipt_settings: CheckReceiptSettings
+    open_ai_settings:OpenAISettings = OpenAISettings()
 
 
     model_config = SettingsConfigDict(
