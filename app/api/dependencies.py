@@ -5,7 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
 from app.models import User
-from app.repositories import UserRepository, ApiLogsRepository, ReceiptRepository, ReceiptCompoundRepository
+from app.repositories import (
+    UserRepository,
+    ApiLogsRepository,
+    ReceiptRepository,
+    ReceiptCompoundRepository,
+    GroupRepository,
+)
 from app.config import get_settings
 from app.foreign_api.check_receipt import CheckReceipt
 
@@ -53,3 +59,9 @@ def get_receipt_compound_repository(session: SessionDep) -> ReceiptCompoundRepos
     return ReceiptCompoundRepository(session)
 
 ReceiptCompoundDep = Annotated[ReceiptCompoundRepository, Depends(get_receipt_compound_repository)]
+
+
+def get_group_repository(session: SessionDep) -> GroupRepository:
+    return GroupRepository(session)
+
+GroupRepoDep = Annotated[GroupRepository, Depends(get_group_repository)]

@@ -38,7 +38,7 @@ class ReceiptCompound(Base):
     vat: Mapped[int] = mapped_column(Integer, nullable=False)
     vat_sum: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False)
     price: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False)
-    quantity: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(10, 3), nullable=False)
     sum: Mapped[Decimal] = mapped_column(Numeric(8, 2), nullable=False)
 
     def __repr__(self) -> str:

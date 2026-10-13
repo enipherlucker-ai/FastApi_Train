@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from app.api.dependencies import SessionDep, UserDep, UserRepoDep, ApiLogsDep
+from app.constants import ADMIN_USER_ID
 from app.models import User
 from app.schemas import UserCreate, UserRead, UserUpdate
 
@@ -18,7 +19,7 @@ async def create_user(
 ) -> User:
     user = await users.create(**data.model_dump())
     await logs.logs_add(
-        user_id=20260308,
+        user_id=ADMIN_USER_ID,
         service="self",
         method="[POST]/create_user",
         comment="Добавление пользователя",
