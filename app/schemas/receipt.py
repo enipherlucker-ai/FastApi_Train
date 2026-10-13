@@ -6,4 +6,4 @@ RawReceipt = Annotated[str, Field(examples=["t=20261010T2119&s=5099.62&fn=738044
 
 
 class ReceiptBase(BaseModel):
-    name: RawReceipt
+    raw_receipt: RawReceipt

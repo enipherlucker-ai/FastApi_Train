@@ -1,11 +1,13 @@
 CREATE TABLE payment_statistic.receipt_compound
 (
-    receipt_id INTEGER NOT NULL REFERENCES payment_statistic.receipt (id),
-    user_id    INTEGER NOT NULL REFERENCES payment_statistic.users (id),
-    vat        FLOAT   NOT NULL,
-    vat_sum    FLOAT   NOT NULL,
-    price      FLOAT   NOT NULL,
-    quantity   INTEGER NOT NULL,
-    sum        FLOAT   NOT NULL,
-    primary key (receipt_id, user_id)
+    id         SERIAL PRIMARY KEY,
+    name       TEXT           NOT NULL,
+    receipt_id INTEGER        NOT NULL REFERENCES payment_statistic.receipt (id),
+    user_id    INTEGER        NOT NULL REFERENCES payment_statistic.users (id),
+    group_id   INTEGER        NOT NULL REFERENCES payment_statistic.groups (id),
+    vat        INTEGER        NOT NULL,
+    vat_sum    NUMERIC(8, 2)  NOT NULL,
+    price      NUMERIC(8, 2)  NOT NULL,
+    quantity   NUMERIC(10, 3) NOT NULL,
+    sum        NUMERIC(8, 2)  NOT NULL
 );

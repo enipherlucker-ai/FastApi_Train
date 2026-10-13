@@ -18,7 +18,7 @@ async def create_user(
 ) -> User:
     user = await users.create(**data.model_dump())
     await logs.logs_add(
-        user_id=20260408,
+        user_id=20260308,
         service="self",
         method="[POST]/create_user",
         comment="Добавление пользователя",
