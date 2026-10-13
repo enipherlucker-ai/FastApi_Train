@@ -8,7 +8,7 @@ CREATE TABLE payment_statistic.users
 
 INSERT INTO payment_statistic.users
     (id, name, age, description)
-VALUES (20260408,
+VALUES (20260308,
         'admin_user',
         18,
         'Административная УЗ');

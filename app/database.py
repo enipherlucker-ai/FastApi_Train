@@ -1,8 +1,9 @@
 from collections.abc import AsyncIterator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from app.config import DATABASE_URL, DB_ECHO
+from app.config import get_settings
 
-engine = create_async_engine(DATABASE_URL, echo=DB_ECHO)
+settings = get_settings()
+engine = create_async_engine(settings.postgres_settings.url, echo=settings.postgres_settings.echo)
 
 session_factory = async_sessionmaker(bind=engine, expire_on_commit=False)
 

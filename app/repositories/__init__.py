@@ -1,5 +1,14 @@
-from app.repositories.base import BaseRepository
-from app.repositories.user import UserRepository
-from app.repositories.logs import ApiLogsRepository
+from .base import BaseRepository
+from .user import UserRepository
+from .logs import ApiLogsRepository
+from .receipt import ReceiptRepository, ReceiptCompoundRepository
+from .groups import GroupRepository
 
-__all__ = ["BaseRepository", "UserRepository", "ApiLogsRepository"]
+__all__ = [
+    "BaseRepository",
+    "UserRepository",
+    "ApiLogsRepository",
+    "ReceiptRepository",
+    "ReceiptCompoundRepository",
+    "GroupRepository",
+]

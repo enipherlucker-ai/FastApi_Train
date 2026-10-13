@@ -1,4 +1,5 @@
 .idea/
 .venv/
-.sandbox/
+__pycache__/
+sandbox/
 .env

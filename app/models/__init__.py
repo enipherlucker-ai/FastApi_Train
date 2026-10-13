@@ -1,5 +1,7 @@
-from app.models.base import Base
-from app.models.user import User
-from app.models.logs import ApiLogs
+from .base import Base
+from .user import User
+from .logs import ApiLogs
+from .receipt import Receipt, ReceiptCompound
+from .groups import Group
 
-__all__ = ["Base", "User", "ApiLogs"]
+__all__ = ["Base", "User", "ApiLogs", "Receipt", "ReceiptCompound", "Group"]
