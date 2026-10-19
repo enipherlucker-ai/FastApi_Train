@@ -1,6 +1,8 @@
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: app/Dockerfile
     image: fastapi-train:local
     ports:
       - "127.0.0.1:8000:8000"
@@ -31,6 +33,21 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    restart: unless-stopped
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    environment:
+      TELEGRAM_SETTINGS__TOKEN: ${TELEGRAM_SETTINGS__TOKEN:?добавь TELEGRAM_SETTINGS__TOKEN в .env}
+      TELEGRAM_SETTINGS__ALLOWED_USER_IDS: ${TELEGRAM_SETTINGS__ALLOWED_USER_IDS:-[]}
+      TELEGRAM_SETTINGS__PROXY: ${TELEGRAM_DOCKER_PROXY:-}
+      RECEIPT_API_SETTINGS__URL: http://api:8000
+    volumes:
+      - ./bot:/tg_bot/bot
+    depends_on:
+      - api
+    stop_signal: SIGINT
     restart: unless-stopped
 
 volumes:
