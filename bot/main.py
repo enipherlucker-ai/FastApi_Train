@@ -14,7 +14,7 @@ logger = logging.getLogger("bot")
 async def run() -> None:
     settings = get_settings()
     async with (
-        httpx.AsyncClient() as tg_client,
+        httpx.AsyncClient(proxy=settings.telegram_settings.proxy or None) as tg_client,
         httpx.AsyncClient(trust_env=False) as api_client,
     ):
         tg = TelegramAPI(

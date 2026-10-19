@@ -36,7 +36,7 @@ async def find_raw_receipt(message: dict, tg: TelegramAPI) -> str | None:
             return code
     return None
 
-async def handle_message(message: dict, tg: TelegramAPI, api: ReceiptApi, allowed_user_ids: list[int]) -> str | None:
+async def handle_message(message: dict, tg: TelegramAPI, api: ReceiptApi, allowed_user_ids: list[int]) -> None:
     chat_id = message["chat"]["id"]
     message_id = message["message_id"]
     user_id = message.get("from", {}).get("id")

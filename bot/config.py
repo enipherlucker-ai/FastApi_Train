@@ -5,10 +5,11 @@ from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class TelegramSettings(BaseModel):
-    token: str = Field(repl=False)
+    token: str = Field(repr=False)
     base_url: str = "https://api.telegram.org"
-    allowed_user_ids: list = []
+    allowed_user_ids: list[int] = []
     poll_timeout: int = 30
+    proxy: str | None = None
 
 
 class ReceiptApiSettings(BaseModel):

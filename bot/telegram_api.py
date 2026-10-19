@@ -21,13 +21,13 @@ class TelegramAPI:
         except httpx.HTTPError as e:
             raise TelegramError(f"{method}: нет связи с Telegram API ({type(e).__name__})") from None
         except ValueError:
-            raise TelegramError(f"{method}: Telegram API верну не JSON, HTTP ({response.status_code})") from None
+            raise TelegramError(f"{method}: Telegram API вернул не JSON, HTTP ({response.status_code})") from None
 
         if not data.get("ok"):
-            raise TelegramError(f"{method}: {data.get("error_code")} {data.get("description")}")
+            raise TelegramError(f"{method}: {data.get('error_code')} {data.get('description')}")
         return data["result"]
 
-    async def get_update(self, offset : int, timeout: int) -> dict:
+    async def get_update(self, offset: int, timeout: int) -> list[dict]:
         params = {"offset": offset, "timeout": timeout, "allowed_updates": ["message"]}
         return await self.call("getUpdates", params=params, http_timeout=timeout + 10)
 
@@ -42,7 +42,7 @@ class TelegramAPI:
 
     async def download_file(self, file_id: str) -> bytes:
         file = await self.call("getFile", {"file_id": file_id})
-        url = f"{self.base_url}/file/bot{self.token}/{file["file_path"]}"
+        url = f"{self.base_url}/file/bot{self.token}/{file['file_path']}"
         try:
             response = await self.client.get(url, timeout=30)
             response.raise_for_status()
