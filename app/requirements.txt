@@ -6,3 +6,4 @@ asyncpg~=0.32.0
 pydantic-settings
 httpx
 openai~=3.29
+pwdlib[argon2]~=0.3.1

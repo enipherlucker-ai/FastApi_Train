@@ -1,14 +1,20 @@
 CREATE TABLE payment_statistic.users
 (
-    id          SERIAL PRIMARY KEY,
-    name        TEXT    NOT NULL,
-    age         INTEGER NOT NULL CHECK (age >= 0),
-    description TEXT
+    id            SERIAL PRIMARY KEY,
+    name          TEXT    NOT NULL,
+    age           INTEGER NOT NULL CHECK (age >= 0),
+    description   TEXT,
+    login         TEXT    NOT NULL UNIQUE,
+    password_hash TEXT    NOT NULL
 );
 
+
+
 INSERT INTO payment_statistic.users
-    (id, name, age, description)
+    (id, name, age, description, login, password_hash)
 VALUES (20260308,
         'admin_user',
         18,
-        'Административная УЗ');
+        'Административная УЗ',
+        'admin',
+        'admin');
