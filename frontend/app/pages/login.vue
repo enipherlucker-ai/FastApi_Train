@@ -11,7 +11,7 @@ async function onSubmit() {
   errorText.value = ''
   loading.value = true
   try {
-    currentUser.value = await $fetch('api/auth/login', {
+    currentUser.value = await $fetch<User>('/api/auth/login', {
       method: 'POST',
       body: {login: login.value, password: password.value},
     })

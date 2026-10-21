@@ -17,7 +17,7 @@ settings = get_settings()
 @router.post("/register", response_model=UserRead, status_code=201)
 async def register(data: RegisterIn, users: UserRepoDep, session: SessionDep) -> User:
     if await users.get_by_login(data.login) is not None:
-        raise HTTPException(status_code=400, detail="login already taken")
+        raise HTTPException(status_code=409, detail="login already taken")
     user = await users.create(
         **data.model_dump(exclude={"password"}),
         password_hash=hash_password(data.password)
@@ -61,14 +61,14 @@ async def login(
 @router.post("/logout", status_code=204)
 async def logout(
         response: Response,
-        user_session: UserSessionRepoDep,
+        user_sessions: UserSessionRepoDep,
         session: SessionDep,
         token: Annotated[str | None, Cookie(alias=SESSION_COOKIE)] = None,
 ):
-    if token is None:
-        user_session = await user_session.get_by_token_hash(hash_token(token))
+    if token is not None:
+        user_session = await user_sessions.get_by_token_hash(hash_token(token))
         if user_session is not None:
-            await user_session.delete(user_session)
+            await user_sessions.delete(user_session)
             await session.commit()
     response.delete_cookie(SESSION_COOKIE)
 

@@ -2,7 +2,7 @@
 const currentUser = useCurrentUser()
 
 async function onLogout(){
-  await $fetch('api/auth/logout', {method: 'POST'})
+  await $fetch('/api/auth/logout', {method: 'POST'})
   currentUser.value = null
   await navigateTo('/login')
 }

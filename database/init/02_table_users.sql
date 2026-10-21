@@ -4,8 +4,8 @@ CREATE TABLE payment_statistic.users
     name          TEXT    NOT NULL,
     age           INTEGER NOT NULL CHECK (age >= 0),
     description   TEXT,
-    login         TEXT    NOT NULL UNIQUE,
-    password_hash TEXT    NOT NULL
+    login         TEXT UNIQUE,
+    password_hash TEXT
 );
 
 
@@ -16,5 +16,5 @@ VALUES (20260308,
         'admin_user',
         18,
         'Административная УЗ',
-        'admin',
-        'admin');
+        NULL,
+        NULL);
