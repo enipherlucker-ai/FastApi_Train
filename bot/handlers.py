@@ -42,7 +42,7 @@ async def handle_message(message: dict, tg: TelegramAPI, api: ReceiptApi, allowe
     user_id = message.get("from", {}).get("id")
 
     if user_id not in allowed_user_ids:
-        await tg.send_message(chat_id, f"Нет доступа к боту")
+        await tg.send_message(chat_id, "Нет доступа к боту")
         return
 
     await tg.send_chat_action(chat_id)
