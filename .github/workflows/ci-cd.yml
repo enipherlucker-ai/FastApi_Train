@@ -1,3 +1,10 @@
+env:
+  IMAGE_PREFIX: ghcr.io/enipherlucker-ai/fastapi_train
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 name: CI/CD
 
 on:
@@ -29,3 +36,51 @@ jobs:
           cp .env.example deploy/.env
           echo "IMAGE_TAG=ci" >> deploy/.env
           docker compose -f deploy/compose.prod.yaml config --quiet
+
+  images:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: ВХОД в GCHR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: api
+        run: |
+          docker build -f app/Dockerfile -t "$IMAGE_PREFIX-api:$GITHUB_SHA" .
+          docker push "$IMAGE_PREFIX-api:$GITHUB_SHA"
+      - name: bot
+        run: |
+          docker build -f bot/Dockerfile -t "$IMAGE_PREFIX-bot:$GITHUB_SHA" .
+          docker push "$IMAGE_PREFIX-bot:$GITHUB_SHA"
+  deploy:
+    needs: images
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - name: SSH-ключ
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Копируем compose, скрипт и init-скрипты базы
+        env:
+          TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+        run: |
+          scp deploy/compose.prod.yaml "$TARGET:/opt/fastapi-train/compose.yaml"
+          scp deploy/deploy.sh "$TARGET:/opt/fastapi-train/deploy.sh"
+          scp database/init/*.sql "$TARGET:/opt/fastapi-train/database/init"
+      - name: Выкатка
+        env:
+          TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+        run: ssh "$TARGET" "/opt/fastapi-train/deploy.sh $GITHUB_SHA"
