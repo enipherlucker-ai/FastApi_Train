@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: docker build -f app/Dockerfile -t api:ci .
-      - run: docker build -f bot/Dockerfile -t bot:ci .
+      - run: docker build bot/Dockerfile -t bot:ci .
       - name: compose.prod.yaml собирается
         run: |
           cp .env.example deploy/.env
