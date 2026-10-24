@@ -24,17 +24,36 @@ jobs:
       - run: ruff check app bot
       - run: python -m compileall -q app bot
 
+
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+
   build:
     runs-on: ubuntu-24.04
-    needs: lint
+    needs: [lint, frontend]
     steps:
       - uses: actions/checkout@v5
       - run: docker build -f app/Dockerfile -t api:ci .
       - run: docker build -f bot/Dockerfile -t bot:ci .
+      - run: docker build -t web:ci frontend
       - name: compose.prod.yaml собирается
         run: |
           cp .env.example deploy/.env
           echo "IMAGE_TAG=ci" >> deploy/.env
+          echo "SITE_DOMAIN=example.com" >> deploy/.env
           docker compose -f deploy/compose.prod.yaml config --quiet
 
   images:
@@ -58,6 +77,10 @@ jobs:
         run: |
           docker build -f bot/Dockerfile -t "$IMAGE_PREFIX-bot:$GITHUB_SHA" .
           docker push "$IMAGE_PREFIX-bot:$GITHUB_SHA"
+      - name: web
+        run: |
+          docker build -t "$IMAGE_PREFIX-web:$GITHUB_SHA" frontend
+          docker push "$IMAGE_PREFIX-web:$GITHUB_SHA"
   deploy:
     needs: images
     runs-on: ubuntu-24.04
@@ -80,6 +103,7 @@ jobs:
           scp deploy/compose.prod.yaml "$TARGET:/opt/fastapi-train/compose.yaml"
           scp deploy/deploy.sh "$TARGET:/opt/fastapi-train/deploy.sh"
           scp database/init/*.sql "$TARGET:/opt/fastapi-train/database/init"
+          scp deploy/Caddyfile "$TARGET:/opt/fastapi-train/Caddyfile"
       - name: Выкатка
         env:
           TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}

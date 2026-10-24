@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { User } from '~/types/user'
 
+useHead({title: 'Авторизация'})
+
 const currentUser = useCurrentUser()
 const login = ref('')
 const password = ref('')
@@ -20,6 +22,10 @@ async function onSubmit() {
     const status = (error as {statusCode?: number}).statusCode
     if (status === 401) {
       errorText.value = 'Неверный логин или пароль'
+    } else if (status === 422) {
+      errorText.value = 'Логин или пароль не подходят по формату'
+    } else if (status === 502 || status === 503) {
+      errorText.value = 'Технические работы, сервис авторизации недоступен, пожалуйста подождите'
     } else {
       errorText.value = 'Сервер не отвечает'
     }

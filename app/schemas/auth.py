@@ -14,5 +14,5 @@ class RegisterIn(UserBase):
 
 
 class LoginIn(BaseModel):
-    login: str
-    password: str
+    login: Login
+    password: Password
